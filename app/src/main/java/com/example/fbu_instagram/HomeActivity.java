@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.example.fbu_instagram.fragments.ComposeFragment;
 import com.example.fbu_instagram.fragments.PostsFragment;
+import com.example.fbu_instagram.fragments.ProfileFragment;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -38,8 +39,7 @@ public class HomeActivity extends AppCompatActivity {
                         // Toast.makeText(HomeActivity.this, "Compose!", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.action_profile:
-                        // TODO -- swap fragment here
-                        fragment = new ComposeFragment();
+                        fragment = new ProfileFragment();
                         // Toast.makeText(HomeActivity.this, "Profile!", Toast.LENGTH_SHORT).show();
                         break;
                 }
