@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.parse.LogInCallback;
 import com.parse.ParseException;
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Log.e("LoginActivity", "Sign up failed");
                     e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Account with this username already exists", Toast.LENGTH_LONG).show();
+
                 }
             }
         });
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     Log.e("LoginActivity", "Login failed");
                     e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Login Failed", Toast.LENGTH_LONG).show();
                 }
             }
         });

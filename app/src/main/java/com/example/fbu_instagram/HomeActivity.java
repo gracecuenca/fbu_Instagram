@@ -1,5 +1,6 @@
 package com.example.fbu_instagram;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,6 +24,7 @@ public class HomeActivity extends AppCompatActivity {
     private EditText etDescription;
     private Button btnCreate;
     private Button btnRefresh;
+    private Button btnLogOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,7 @@ public class HomeActivity extends AppCompatActivity {
         etDescription = (EditText) findViewById(R.id.etDescription);
         btnCreate = (Button) findViewById(R.id.btnCreate);
         btnRefresh = (Button) findViewById(R.id.btnRefresh);
+        btnLogOut = (Button) findViewById(R.id.btnLogOut);
 
         btnCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,12 +48,12 @@ public class HomeActivity extends AppCompatActivity {
 
                 /*
                 // getExternalFilesDir() + "/Pictures" should match the declaration in fileprovider.xml paths
-File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");
+                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");
 
-// wrap File object into a content provider. NOTE: authority here should match authority in manifest declaration
-bmpUri = FileProvider.getUriForFile(MyActivity.this, "com.codepath.fileprovider", file);
+                // wrap File object into a content provider. NOTE: authority here should match authority in manifest declaration
+                bmpUri = FileProvider.getUriForFile(MyActivity.this, "com.codepath.fileprovider", file);
 
-WILL NEED TO DO THIS FILE -> FILE PROVIDER stuff later
+                WILL NEED TO DO THIS FILE -> FILE PROVIDER stuff later
                  */
 
                 // create the post
@@ -62,6 +65,14 @@ WILL NEED TO DO THIS FILE -> FILE PROVIDER stuff later
             @Override
             public void onClick(View v) {
                 loadTopPosts();
+            }
+        });
+
+        // logout functionality will live here for now
+        btnLogOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
             }
         });
 
@@ -105,4 +116,14 @@ WILL NEED TO DO THIS FILE -> FILE PROVIDER stuff later
             }
         });
     }
+
+    // logout function will live here
+    private void logout(){
+        ParseUser.logOut();
+        ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
+    }
+
+
 }
