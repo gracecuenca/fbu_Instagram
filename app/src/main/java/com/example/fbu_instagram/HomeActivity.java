@@ -1,12 +1,20 @@
 package com.example.fbu_instagram;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.fbu_instagram.model.Post;
 import com.parse.FindCallback;
@@ -20,11 +28,18 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private static final String imagePath = "/document/primary:Download/puppy.jpg";
     private EditText etDescription;
     private Button btnCreate;
     private Button btnRefresh;
     private Button btnLogOut;
+    private Button btnCapture;
+    private ImageView ivPostImage;
+
+    // needed for photo capturing intent
+    public final String APP_TAG = "MyCustomApp";
+    public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
+    public String photoFileName = "photo.jpg";
+    File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +50,8 @@ public class HomeActivity extends AppCompatActivity {
         btnCreate = (Button) findViewById(R.id.btnCreate);
         btnRefresh = (Button) findViewById(R.id.btnRefresh);
         btnLogOut = (Button) findViewById(R.id.btnLogOut);
+        btnCapture = (Button) findViewById(R.id.btnCapture);
+        ivPostImage = (ImageView) findViewById(R.id.ivPostImage);
 
         btnCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,25 +59,17 @@ public class HomeActivity extends AppCompatActivity {
                 final String description = etDescription.getText().toString();
                 final ParseUser user = ParseUser.getCurrentUser();
 
-                // hardcoded image file for now
-                final File file = new File(imagePath);
-                final ParseFile parseFile = new ParseFile(file);
-
-                /*
-                // getExternalFilesDir() + "/Pictures" should match the declaration in fileprovider.xml paths
-                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");
-
-                // wrap File object into a content provider. NOTE: authority here should match authority in manifest declaration
-                bmpUri = FileProvider.getUriForFile(MyActivity.this, "com.codepath.fileprovider", file);
-
-                WILL NEED TO DO THIS FILE -> FILE PROVIDER stuff later
-                 */
-
-                // create the post
-                createPost(description, parseFile, user);
+                // checking to see if the user uploaded a file
+                if(photoFile == null || ivPostImage.getDrawable() == null){
+                    Log.e("HomeActivity", "No photo to submit");
+                    Toast.makeText(HomeActivity.this, "There is no photo!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                savePost(description, user, photoFile);
             }
         });
 
+        // refresh functionality
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,21 +85,78 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        // capturing an image with the phone's camera
+        btnCapture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchCamera();
+            }
+        });
+
     }
 
-    private void createPost(String description, ParseFile image, ParseUser user){
-        final Post newPost = new Post();
-        newPost.setDescription(description);
-        newPost.setImage(image);
-        newPost.setUser(user);
+    private void launchCamera(){
+        // create Intent to take a picture and return control to the calling application
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Create a File reference to access to future access
+        photoFile = getPhotoFileUri(photoFileName);
 
-        newPost.saveInBackground(new SaveCallback() {
+        // wrap File object into a content provider
+        Uri fileProvider = FileProvider.getUriForFile(HomeActivity.this, "com.codepath.fileprovider", photoFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Start the image capture intent to take photo
+            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // by this point we have the camera photo on disk
+                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                // Load the taken image into a preview
+                ivPostImage.setImageBitmap(takenImage);
+            } else { // Result was a failure
+                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Returns the File for a photo stored on disk given the fileName
+    public File getPhotoFileUri(String fileName) {
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_TAG);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+            Log.d(APP_TAG, "failed to create directory");
+        }
+
+        // Return the file target for the photo based on filename
+        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
+
+        return file;
+    }
+
+    private void savePost(String description, ParseUser user, File photoFile){
+        Post post = new Post();
+        post.setDescription(description);
+        post.setUser(user);
+        post.setImage(new ParseFile(photoFile));
+        post.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if(e == null){
-                    Log.d("HomeActivity", "Post created successfully!");
+                    Log.d("HomeActivity", "Successfully save post!");
+                    etDescription.setText(""); // clear out description text box
+                    ivPostImage.setImageResource(0); // clear out the image view
+                    Toast.makeText(HomeActivity.this, "Successfully posted!", Toast.LENGTH_LONG).show();
                 }else{
+                    Log.e("HomeActivity", "Error while saving post");
                     e.printStackTrace();
+                    return;
                 }
             }
         });
