@@ -36,7 +36,7 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView ivPostImage;
 
     // needed for photo capturing intent
-    public final String APP_TAG = "MyCustomApp";
+    public final String APP_TAG = "HomeActivity";
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     File photoFile;
@@ -69,15 +69,13 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        // refresh functionality
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadTopPosts();
+                loadTopPosts(); // for refresh
             }
         });
 
-        // logout functionality will live here for now
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,14 +174,13 @@ public class HomeActivity extends AppCompatActivity {
                                 +"\nusername = " + objects.get(i).getUser().getUsername()
                         );
                     }
-                }else{
+                } else{
                     e.printStackTrace();
                 }
             }
         });
     }
 
-    // logout function will live here
     private void logout(){
         ParseUser.logOut();
         ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null

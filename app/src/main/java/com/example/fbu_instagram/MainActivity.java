@@ -27,6 +27,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // the activity_main.xml holds the log in screen
 
+        // enabling user persistence
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser != null) { // user has already logged in
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+
+        }
+
         etUsername = (EditText) findViewById(R.id.etUsername);
         etPassword = (EditText) findViewById(R.id.etPassword);
         btnLogin = (Button) findViewById(R.id.btnLogin);
@@ -37,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final String username = etUsername.getText().toString();
                 final String password = etPassword.getText().toString();
-
                 login(username, password);
             }
         });
@@ -47,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final String username = etUsername.getText().toString();
                 final String password = etPassword.getText().toString();
-
                 signUp(username, password);
             }
         });
