@@ -33,10 +33,9 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, HomeActivity.class);
             startActivity(intent);
             finish();
-        } else {
-
         }
 
+        // hooking up the buttons and setting up onClick listeners
         etUsername = (EditText) findViewById(R.id.etUsername);
         etPassword = (EditText) findViewById(R.id.etPassword);
         btnLogin = (Button) findViewById(R.id.btnLogin);

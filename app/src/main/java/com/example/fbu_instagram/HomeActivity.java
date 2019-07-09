@@ -20,6 +20,7 @@ import com.example.fbu_instagram.model.Post;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -91,6 +92,28 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        queryPosts();
+
+    }
+
+    // query posts method
+    private void queryPosts(){
+        ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
+        postQuery.include(Post.KEY_USER);
+        postQuery.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> posts, ParseException e) {
+                if(e != null){ // there was an error
+                    Log.e("HomeActivity", "Error with query");
+                    e.printStackTrace();
+                    return;
+                }
+                for(int i = 0; i < posts.size(); i++){
+                    Log.d("HomeActivity", "Post " + posts.get(i).getDescription()+
+                            " username: "+posts.get(i).getUser().getUsername());
+                }
+            }
+        });
     }
 
     private void launchCamera(){
@@ -187,6 +210,5 @@ public class HomeActivity extends AppCompatActivity {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
     }
-
 
 }
