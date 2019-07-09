@@ -24,7 +24,6 @@ import com.example.fbu_instagram.model.Post;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -43,7 +42,7 @@ public class ComposeFragment extends Fragment {
     private ImageView ivPostImage;
 
     // needed for photo capturing intent
-    public final String APP_TAG = "HomeActivity";
+    public final String APP_TAG = "ComposeFragment";
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     File photoFile;
@@ -75,7 +74,7 @@ public class ComposeFragment extends Fragment {
 
                 // checking to see if the user uploaded a file
                 if(photoFile == null || ivPostImage.getDrawable() == null){
-                    Log.e("HomeActivity", "No photo to submit");
+                    Log.e(APP_TAG, "No photo to submit");
                     Toast.makeText(getContext(), "There is no photo!", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -102,26 +101,6 @@ public class ComposeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 launchCamera();
-            }
-        });
-    }
-
-    // query posts method
-    private void queryPosts(){
-        ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
-        postQuery.include(Post.KEY_USER);
-        postQuery.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> posts, ParseException e) {
-                if(e != null){ // there was an error
-                    Log.e("HomeActivity", "Error with query");
-                    e.printStackTrace();
-                    return;
-                }
-                for(int i = 0; i < posts.size(); i++){
-                    Log.d("HomeActivity", "Post " + posts.get(i).getDescription()+
-                            " username: "+posts.get(i).getUser().getUsername());
-                }
             }
         });
     }
@@ -180,12 +159,12 @@ public class ComposeFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if(e == null){
-                    Log.d("HomeActivity", "Successfully save item_post!");
+                    Log.d(APP_TAG, "Successfully save item_post!");
                     etDescription.setText(""); // clear out description text box
                     ivPostImage.setImageResource(0); // clear out the image view
                     Toast.makeText(getContext(), "Successfully posted!", Toast.LENGTH_LONG).show();
                 }else{
-                    Log.e("HomeActivity", "Error while saving item_post");
+                    Log.e(APP_TAG, "Error while saving item_post");
                     e.printStackTrace();
                     return;
                 }
@@ -202,7 +181,7 @@ public class ComposeFragment extends Fragment {
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
                     for(int i = 0; i < objects.size(); i++){
-                        Log.d("HomeActivity", "Post["+i+"] = "
+                        Log.d(APP_TAG, "Post["+i+"] = "
                                 + objects.get(i).getDescription()
                                 +"\nusername = " + objects.get(i).getUser().getUsername()
                         );
