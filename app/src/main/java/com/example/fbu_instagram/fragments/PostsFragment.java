@@ -2,6 +2,7 @@ package com.example.fbu_instagram.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,16 +20,28 @@ import com.parse.ParseQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostsFragment extends Fragment {
+public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     public final String APP_TAG = "PostsFragment";
     private RecyclerView rvPosts;
     protected PostsAdapter adapter;
     protected List<Post> mPosts;
 
+    // needed for swipe to refresh
+    private SwipeRefreshLayout swipeContainer;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_posts, container, false);
+        View view = inflater.inflate(R.layout.fragment_posts, container, false);
+        swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        swipeContainer.setOnRefreshListener(this);
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        return view;
     }
 
     @Override
@@ -70,5 +83,13 @@ public class PostsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onRefresh() {
+        mPosts.clear();
+        queryPosts();
+        // signal refresh has finished
+        swipeContainer.setRefreshing(false);
     }
 }
