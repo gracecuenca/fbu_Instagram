@@ -24,6 +24,13 @@ public class HomeActivity extends AppCompatActivity {
 
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
 
+        /*
+        ActionBar bar = getSupportActionBar();
+        bar.setLogo(R.drawable.nav_logo_whiteout);
+        bar.setDisplayUseLogoEnabled(true);
+        bar.setDisplayShowTitleEnabled(false);
+        */
+
         // bottom navigation bar setup continued
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
