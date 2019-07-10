@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
@@ -24,11 +23,6 @@ public class HomeActivity extends AppCompatActivity {
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-
-        ActionBar bar = getSupportActionBar();
-        bar.setLogo(R.drawable.nav_logo_whiteout);
-        bar.setDisplayUseLogoEnabled(true);
-        bar.setDisplayShowTitleEnabled(false);
 
         // bottom navigation bar setup continued
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
