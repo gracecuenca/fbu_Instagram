@@ -61,7 +61,6 @@ public class ComposeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         etDescription = (EditText) view.findViewById(R.id.etDescription);
         btnCreate = (Button) view.findViewById(R.id.btnCreate);
-        btnRefresh = (Button) view.findViewById(R.id.btnRefresh);
         btnLogOut = (Button) view.findViewById(R.id.btnLogOut);
         btnCapture = (Button) view.findViewById(R.id.btnCapture);
         ivPostImage = (ImageView) view.findViewById(R.id.ivPostImage);
@@ -82,12 +81,14 @@ public class ComposeFragment extends Fragment {
             }
         });
 
+        /*
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadTopPosts(); // for refresh
             }
         });
+        */
 
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
