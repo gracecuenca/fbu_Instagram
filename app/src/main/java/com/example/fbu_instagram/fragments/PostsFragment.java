@@ -34,10 +34,7 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private SwipeRefreshLayout swipeContainer;
 
     // needed for infinite pagination
-    private LinearLayoutManager linearLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
-    // max_id that is updated and tracked for infinite pagenation
-    private long max_id = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,7 +62,38 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         // set the adapter on the recycler view
         rvPosts.setAdapter(adapter);
         // set the layout manager on the recycler view
-        rvPosts.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        rvPosts.setLayoutManager(linearLayoutManager);
+
+        // Retain an instance so that you can call `resetState()` for fresh searches
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
+                postQuery.include(Post.KEY_USER);
+                postQuery.setSkip(totalItemsCount);
+                Log.d(APP_TAG, "totalItemsCount: "+ totalItemsCount);
+                postQuery.addDescendingOrder(Post.KEY_CREATED_AT);
+                postQuery.findInBackground(new FindCallback<Post>() {
+                    @Override
+                    public void done(List<Post> posts, ParseException e) {
+                        if(e != null){ // there was an error
+                            Log.e(APP_TAG, "Error with query");
+                            e.printStackTrace();
+                            return;
+                        }
+                        mPosts.addAll(posts);
+                        adapter.notifyDataSetChanged();
+                        for(int i = 0; i < posts.size(); i++){
+                            Log.d(APP_TAG, "Post " + posts.get(i).getDescription()+
+                                    " username: "+posts.get(i).getUser().getUsername());
+                        }
+                    }
+                });
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvPosts.addOnScrollListener(scrollListener);
 
         // setting up swipe container for pull to refresh
         swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
@@ -75,18 +103,6 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-
-        // enabling endless pagination below
-        // setting up the scrollListener
-        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-            @Override
-            public void onLoadMore(final int page, int totalItemsCount, RecyclerView view) {
-                fetchTimelineAsync(true);
-            }
-        };
-
-        // set up scroller
-        // rvPosts.addOnScrollListener(scrollListener);
 
         queryPosts();
     }
@@ -123,23 +139,6 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         swipeContainer.setRefreshing(false);
     }
 
-    // method to fetch new data
-    // when isNotRefresh is true, we fetch data for the first time and max_id is -1
-    // so that the default page is shown
-    // when false, it indicates that infinite pagenation is enabled and max_id is
-    // set to the top of the next Post id
-    public void fetchTimelineAsync(final boolean isNotRefresh) {
-
-        if(isNotRefresh){
-            max_id = mPosts.get(mPosts.size()-1).hashCode();
-        }
-        else{
-            max_id = -1;
-            adapter.clear();
-        }
-        populateTimeline();
-    }
-
     private void loadTopPosts(){
         final Post.Query postsQuery = new Post.Query();
         postsQuery.getTop().withUser();
@@ -159,11 +158,6 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 }
             }
         });
-    }
-
-    private void populateTimeline(){
-        loadTopPosts();
-        adapter.notifyItemChanged(mPosts.size()-1);
     }
 
 }

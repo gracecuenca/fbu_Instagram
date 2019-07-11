@@ -36,7 +36,6 @@ public class ComposeFragment extends Fragment {
 
     private EditText etDescription;
     private Button btnCreate;
-    private Button btnRefresh;
     private Button btnLogOut;
     private Button btnCapture;
     private ImageView ivPostImage;
@@ -46,6 +45,8 @@ public class ComposeFragment extends Fragment {
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     File photoFile;
+
+    // needed for infinite pagenation
 
     // The onCreateView method is called when Fragment should create its View object hierarchy,
     // either dynamically or via XML layout inflation.
@@ -80,15 +81,6 @@ public class ComposeFragment extends Fragment {
                 savePost(description, user, photoFile);
             }
         });
-
-        /*
-        btnRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadTopPosts(); // for refresh
-            }
-        });
-        */
 
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,27 +160,6 @@ public class ComposeFragment extends Fragment {
                     Log.e(APP_TAG, "Error while saving item_post");
                     e.printStackTrace();
                     return;
-                }
-            }
-        });
-    }
-
-    private void loadTopPosts(){
-        final Post.Query postsQuery = new Post.Query();
-        postsQuery.getTop().withUser();
-
-        postsQuery.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> objects, ParseException e) {
-                if(e == null){
-                    for(int i = 0; i < objects.size(); i++){
-                        Log.d(APP_TAG, "Post["+i+"] = "
-                                + objects.get(i).getDescription()
-                                +"\nusername = " + objects.get(i).getUser().getUsername()
-                        );
-                    }
-                } else{
-                    e.printStackTrace();
                 }
             }
         });
