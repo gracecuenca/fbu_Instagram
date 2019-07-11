@@ -19,6 +19,7 @@ import com.example.fbu_instagram.model.Post;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,10 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
                 postQuery.include(Post.KEY_USER);
                 postQuery.setSkip(totalItemsCount);
-                Log.d(APP_TAG, "totalItemsCount: "+ totalItemsCount);
+                if(!getClass().equals(PostsFragment.class)) {
+                    postQuery.whereEqualTo(Post.KEY_USER, ParseUser.getCurrentUser());
+                }
+                // Log.d(APP_TAG, "totalItemsCount: "+ totalItemsCount);
                 postQuery.addDescendingOrder(Post.KEY_CREATED_AT);
                 postQuery.findInBackground(new FindCallback<Post>() {
                     @Override
