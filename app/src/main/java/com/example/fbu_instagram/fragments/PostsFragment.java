@@ -18,6 +18,7 @@ import com.example.fbu_instagram.R;
 import com.example.fbu_instagram.model.Post;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -70,30 +71,7 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
-                postQuery.include(Post.KEY_USER);
-                postQuery.setSkip(totalItemsCount);
-                if(!getClass().equals(PostsFragment.class)) {
-                    postQuery.whereEqualTo(Post.KEY_USER, ParseUser.getCurrentUser());
-                }
-                // Log.d(APP_TAG, "totalItemsCount: "+ totalItemsCount);
-                postQuery.addDescendingOrder(Post.KEY_CREATED_AT);
-                postQuery.findInBackground(new FindCallback<Post>() {
-                    @Override
-                    public void done(List<Post> posts, ParseException e) {
-                        if(e != null){ // there was an error
-                            Log.e(APP_TAG, "Error with query");
-                            e.printStackTrace();
-                            return;
-                        }
-                        mPosts.addAll(posts);
-                        adapter.notifyDataSetChanged();
-                        for(int i = 0; i < posts.size(); i++){
-                            Log.d(APP_TAG, "Post " + posts.get(i).getDescription()+
-                                    " username: "+posts.get(i).getUser().getUsername());
-                        }
-                    }
-                });
+                fetchTimelineAsync(true);
             }
         };
         // Adds the scroll listener to RecyclerView
@@ -108,7 +86,33 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        queryPosts();
+        fetchTimelineAsync(false);
+    }
+
+    // needed for infinite pagination
+    public void fetchTimelineAsync(final boolean isNotRefresh){
+        ParseQuery<Post> postQuery = new ParseQuery<Post>(Post.class);
+        if(isNotRefresh) postQuery.whereLessThan(Post.KEY_CREATED_AT, mPosts.get(mPosts.size()-1).getCreatedAt());
+        postQuery.include(Post.KEY_USER);
+        postQuery.setLimit(20); // required feature to limit to top 20 posts
+        // Log.d(APP_TAG, "post desc: "+mPosts.get(mPosts.size()-1).getDescription());
+        if(!getClass().equals(PostsFragment.class)) {
+            postQuery.whereEqualTo(Post.KEY_USER, ParseUser.getCurrentUser());
+        }
+        // Log.d(APP_TAG, "totalItemsCount: "+ totalItemsCount);
+        postQuery.addDescendingOrder(Post.KEY_CREATED_AT);
+        postQuery.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> posts, ParseException e) {
+                if(e != null){ // there was an error
+                    Log.e(APP_TAG, "Error with query");
+                    e.printStackTrace();
+                    return;
+                }
+                mPosts.addAll(posts);
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
     // query posts method
@@ -127,10 +131,6 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 }
                 mPosts.addAll(posts);
                 adapter.notifyDataSetChanged();
-                for(int i = 0; i < posts.size(); i++){
-                    Log.d(APP_TAG, "Post " + posts.get(i).getDescription()+
-                            " username: "+posts.get(i).getUser().getUsername());
-                }
             }
         });
     }
@@ -138,7 +138,7 @@ public class PostsFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     @Override
     public void onRefresh() {
         mPosts.clear();
-        queryPosts();
+        fetchTimelineAsync(false);
         // signal refresh has finished
         swipeContainer.setRefreshing(false);
     }

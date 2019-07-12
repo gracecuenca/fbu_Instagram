@@ -50,8 +50,6 @@ public class ComposeFragment extends Fragment {
     public String photoFileName = "photo.jpg";
     File photoFile;
 
-    // needed for infinite pagenation
-
     // The onCreateView method is called when Fragment should create its View object hierarchy,
     // either dynamically or via XML layout inflation.
     @Override
@@ -147,10 +145,12 @@ public class ComposeFragment extends Fragment {
         return file;
     }
 
+    // method that posts to database and to the home timeline feed
     private void savePost(String description, ParseUser user, File photoFile){
         Post post = new Post();
         post.setDescription(description);
         post.setUser(user);
+        // post.setLikedBy();
         post.setImage(new ParseFile(photoFile));
         post.saveInBackground(new SaveCallback() {
             @Override

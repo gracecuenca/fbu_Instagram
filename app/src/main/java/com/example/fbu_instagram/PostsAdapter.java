@@ -7,12 +7,16 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.fbu_instagram.model.Post;
+import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.parceler.Parcels;
 
@@ -57,14 +61,20 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         private TextView tvDescription;
         private TextView tvSmallHandle;
         private TextView tvTimeStamp;
+        private ImageButton ibLike;
 
         public ViewHolder(View itemView){
+
             super(itemView);
+
             tvHandle = (TextView) itemView.findViewById(R.id.tvHandle);
             ivImage = (ImageView) itemView.findViewById(R.id.ivImage);
             tvDescription = (TextView) itemView.findViewById(R.id.tvDescription);
             tvSmallHandle = (TextView) itemView.findViewById(R.id.tvSmallHandle);
             tvTimeStamp = (TextView) itemView.findViewById(R.id.tvTimeStamp);
+            ibLike = (ImageButton) itemView.findViewById(R.id.ibLike);
+
+            // set up on click listener for each post in the timeline, redirects to detailed view
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -83,6 +93,29 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                     }
                 }
             });
+
+            // onclick listener for like button
+            ibLike.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // gets item position
+                    int position = getAdapterPosition();
+                    // make sure the position is valid, i.e. actually exists in the view
+                    if (position != RecyclerView.NO_POSITION) {
+                        // get the movie at the position, this won't work if the class is static
+                        Post post = posts.get(position);
+                        if(!post.hasUser(ParseUser.getCurrentUser())){
+                            ibLike.setImageResource(R.drawable.ufi_heart_active);
+                            post.addLikedUser(ParseUser.getCurrentUser());
+                        } else{
+                            ibLike.setImageResource(R.drawable.ufi_heart);
+                            post.removeLikedUser(ParseUser.getCurrentUser());
+                        }
+                        post.saveInBackground();
+                    }
+                    notifyItemChanged(position);
+                }
+            });
         }
 
         public void bind(Post post){
@@ -94,6 +127,12 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             }
             tvDescription.setText(post.getDescription());
             tvTimeStamp.setText(getRelativeTimeAgo(post));
+            // post.setLikedBy();
+            if(post.hasUser(ParseUser.getCurrentUser())){
+                ibLike.setImageResource(R.drawable.ufi_heart_active);
+            } else{
+                ibLike.setImageResource(R.drawable.ufi_heart);
+            }
         }
 
     }

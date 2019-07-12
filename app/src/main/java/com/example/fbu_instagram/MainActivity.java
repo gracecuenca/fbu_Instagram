@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // TODO -- do sign up and login have to be separate or can we channel them into one common thread
     private void signUp(String username, String password){
         // Create the ParseUser
         ParseUser user = new ParseUser();
